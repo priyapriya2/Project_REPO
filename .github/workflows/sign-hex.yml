@@ -1,1 +1,44 @@
 
+name: Sign HEX File
+
+on:
+  workflow_dispatch:
+    inputs:
+      oem:
+        description: 'OEM Name (e.g., oem1, oem2)'
+        required: true
+      hex_file:
+        description: 'Path to HEX file'
+        required: true
+        default: 'hex_files/firmware.hex'
+
+jobs:
+  sign:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Project_Repo
+        uses: actions/checkout@v4
+
+      - name: Checkout private signer-repo
+        uses: actions/checkout@v4
+        with:
+          repository: priyapriya2/signer-repo
+          path: signer-repo
+          token: ${{ secrets.PRIVATE_REPO_PAT }}
+
+      - name: Sign HEX file
+        run: |
+          $signer = "signer-repo\\tools\\Signingkey.exe"
+          $keyFile = "signer-repo\\keys\\${{ github.event.inputs.oem }}_private.key"
+          $hexFile = "${{ github.event.inputs.hex_file }}"
+          $signatureFile = "signature.sig"
+
+          & $signer $hexFile $keyFile $signatureFile
+          
+
+      - name: Upload signature artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hex_signature
+          path: signature.txt
