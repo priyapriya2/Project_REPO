@@ -2,15 +2,17 @@
 name: Sign HEX File
 
 on:
+  push:
+    paths:
+      - '**.hex'   # Auto-run when a HEX file changes
   workflow_dispatch:
     inputs:
       oem:
         description: 'OEM Name (e.g., oem1, oem2)'
         required: true
       hex_file:
-        description: 'Path to HEX file'
-        required: true
-        default: 'hex_files/firmware.hex'
+        description: 'Path to HEX file (optional if auto-triggered)'
+        required: false
 
 jobs:
   sign:
@@ -26,15 +28,24 @@ jobs:
           repository: priyapriya2/signer-repo
           path: signer-repo
           token: ${{ secrets.PRIVATE_REPO_PAT }}
+          
+      - name: Determine HEX file path
+        id: findhex
+        run: |
+          if ("${{ github.event_name }}" -eq "push") {
+            $hexFile = Get-ChildItem -Path . -Recurse -Filter *.hex | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            echo "HEX_FILE=$($hexFile.FullName)" >> $env:GITHUB_ENV
+          } else {
+            echo "HEX_FILE=${{ github.event.inputs.hex_file }}" >> $env:GITHUB_ENV
+          }    
 
       - name: Sign HEX file
         run: |
           $signer = "signer-repo\\tools\\Signingkey.exe"
           $keyFile = "signer-repo\\keys\\private.key"
-          $hexFile = "${{ github.event.inputs.hex_file }}"
           $signatureFile = "signature.sig"
 
-          & $signer $hexFile $keyFile $signatureFile
+          & $signer $env:HEX_FILE $keyFile $signatureFile
           
 
       - name: Upload signature artifact
