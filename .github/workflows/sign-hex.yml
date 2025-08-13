@@ -41,4 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hex_signature
-          path: signature.txt
+          path: signature.sig
