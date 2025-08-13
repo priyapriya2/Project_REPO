@@ -2,9 +2,6 @@
 name: Sign HEX File
 
 on:
-  push:
-    paths:
-      - '**.hex'   # Auto-run when a HEX file changes
   workflow_dispatch:
     inputs:
       oem:
@@ -32,12 +29,8 @@ jobs:
       - name: Determine HEX file path
         id: findhex
         run: |
-          if ("${{ github.event_name }}" -eq "push") {
-            $hexFile = Get-ChildItem -Path . -Recurse -Filter *.hex | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-            echo "HEX_FILE=$($hexFile.FullName)" >> $env:GITHUB_ENV
-          } else {
             echo "HEX_FILE=${{ github.event.inputs.hex_file }}" >> $env:GITHUB_ENV
-          }    
+              
 
       - name: Sign HEX file
         run: |
