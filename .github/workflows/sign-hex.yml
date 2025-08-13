@@ -30,7 +30,7 @@ jobs:
       - name: Sign HEX file
         run: |
           $signer = "signer-repo\\tools\\Signingkey.exe"
-          $keyFile = "signer-repo\\keys\\${{ github.event.inputs.oem }}_private.key"
+          $keyFile = "signer-repo\\keys\\private.key"
           $hexFile = "${{ github.event.inputs.hex_file }}"
           $signatureFile = "signature.sig"
 
