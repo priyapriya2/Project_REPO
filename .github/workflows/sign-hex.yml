@@ -34,9 +34,9 @@ jobs:
         id: find_exe
         run: |
              $oem = "${{ github.event.inputs.oem }}"
-             $exePath = Get-ChildItem -Path "signer-repo/tools/$oem" -Filter *.exe -Recurse | Select-Object -First 1
+             $exePath = Get-ChildItem -Path "signer-repo/$OEM Name" -Filter *.exe -Recurse | Select-Object -First 1
              if (-not $exePath) {
-                Write-Error "No exe file found in signer-repo/tools/$oem"
+                Write-Error "No exe file found in signer-repo/$OEM Name"
                 exit 1
                }
              echo "exe_path=$($exePath.FullName)" >> $env:GITHUB_OUTPUT
