@@ -30,15 +30,26 @@ jobs:
         id: findhex
         run: |
             echo "HEX_FILE=${{ github.event.inputs.hex_file }}" >> $env:GITHUB_ENV
+      - name: Find EXE in OEM folder
+        id: find_exe
+        run: |
+             $oem = "${{ github.event.inputs.oem }}"
+             $exePath = Get-ChildItem -Path "signer-repo/tools/$oem" -Filter *.exe -Recurse | Select-Object -First 1
+             if (-not $exePath) {
+                Write-Error "No exe file found in signer-repo/tools/$oem"
+                exit 1
+               }
+             echo "exe_path=$($exePath.FullName)" >> $env:GITHUB_OUTPUT
+      
               
 
       - name: Sign HEX file
         run: |
-          $signer = "signer-repo\\tools\\Signingkey.exe"
+        
           $keyFile = "signer-repo\\keys\\private.key"
           $signatureFile = "signature.sig"
 
-          & $signer $env:HEX_FILE $keyFile $signatureFile
+          & ${{ steps.find_exe.outputs.exe_path }} $env:HEX_FILE $keyFile $signatureFile
           
 
       - name: Upload signature artifact
